@@ -1,9 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
+#nullable disable
+
 namespace API.Data.Migrations
 {
+    /// <inheritdoc />
     public partial class GroupsAdded : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -32,8 +36,7 @@ namespace API.Data.Migrations
                         name: "FK_Connections_Groups_GroupName",
                         column: x => x.GroupName,
                         principalTable: "Groups",
-                        principalColumn: "Name",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Name");
                 });
 
             migrationBuilder.CreateIndex(
@@ -42,6 +45,7 @@ namespace API.Data.Migrations
                 column: "GroupName");
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

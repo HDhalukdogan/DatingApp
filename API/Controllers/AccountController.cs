@@ -1,7 +1,5 @@
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.Entities;
@@ -15,19 +13,17 @@ namespace API.Controllers
 {
     public class AccountController : BaseApiController
     {
+        private readonly UserManager<AppUser> _userManager;
         private readonly ITokenService _tokenService;
         private readonly IMapper _mapper;
-        private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager;
-        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, IMapper mapper)
+        public AccountController(UserManager<AppUser> userManager, ITokenService tokenService, IMapper mapper)
         {
-            _signInManager = signInManager;
             _userManager = userManager;
             _mapper = mapper;
             _tokenService = tokenService;
         }
 
-        [HttpPost("register")]
+        [HttpPost("register")] // POST: api/account/register?username=dave&password=pwd
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
             if (await UserExists(registerDto.Username)) return BadRequest("Username is taken");
@@ -58,14 +54,13 @@ namespace API.Controllers
         {
             var user = await _userManager.Users
                 .Include(p => p.Photos)
-                .SingleOrDefaultAsync(x => x.UserName == loginDto.Username.ToLower());
+                .SingleOrDefaultAsync(x => x.UserName == loginDto.Username);
 
-            if (user == null) return Unauthorized("Invalid username");
+            if (user == null) return Unauthorized("invalid username");
 
-            var result = await _signInManager
-                .CheckPasswordSignInAsync(user, loginDto.Password, false);
+            var result = await _userManager.CheckPasswordAsync(user, loginDto.Password);
 
-            if (!result.Succeeded) return Unauthorized();
+            if (!result) return Unauthorized("Invalid password");
 
             return new UserDto
             {
